@@ -1,0 +1,6 @@
+/env/
+__pycache__/
+app/__pycache__/
+*.sqlite
+config.py
+.flaskenv
