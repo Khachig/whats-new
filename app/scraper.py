@@ -92,7 +92,7 @@ class NarwhalScraper(Scraper):
         html = response.content
         soup = BeautifulSoup(html, 'html.parser')
         banner = soup.find('section', class_='intro__banner')
-        image = banner.find('img')['src']
+        image = banner.find('div', class_='progressive')['data-href']
         return image
 
     def _get_author(self, author_id: int) -> Tuple[str, str]:
