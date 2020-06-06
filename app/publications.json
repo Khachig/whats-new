@@ -1,0 +1,19 @@
+[
+  {
+    "id": 0,
+    "name": "The Narwhal",
+    "param_value": "the_narwhal",
+    "categories": [
+      "explainer",
+      "in-depth",
+      "investigation",
+      "news",
+      "newsletter",
+      "on-the-ground",
+      "opinion",
+      "photo-essay",
+      "profile",
+      "video"
+    ]
+  }
+]

@@ -1,11 +1,14 @@
 from flask import jsonify
-from typing import Dict, Optional, Union
+from typing import Dict, Union, List
 
 from app import app
+from .scraper import SCRAPERS
 
 
 def get_articles(data: Dict[str, Union[str, int]]) -> Dict[str, str]:
-    articles = [{'article': 'https://example.com', 'image': 'https://image.com'} for i in range(data['number'])]
+    scraper = SCRAPERS[data['website']]()
+    articles = scraper.get_articles(data['categories'],
+                                    data['number'])
     return articles
 
 
@@ -13,12 +16,11 @@ def get_articles(data: Dict[str, Union[str, int]]) -> Dict[str, str]:
 @app.route('/website=<website>/category=<category>/number=<int:number>')
 @app.route('/website=<website>/category=<category>/date_range=<date_range>')
 @app.route('/website=<website>/category=<category>/number=<int:number>/date_range=<date_range>')
-def get_query(website: str, category: str, number: int = 3, date_range: Optional[str] = None):
+def get_query(website: str, category: str, number: int = 3):
 
     data = {'website': website,
-            'category': category,
-            'number': number,
-            'date_range': date_range}
+            'categories': category.split(','),
+            'number': number}
 
     articles = get_articles(data)
 
