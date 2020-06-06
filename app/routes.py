@@ -1,5 +1,7 @@
-from flask import jsonify
-from typing import Dict, Union, List
+import os
+import json
+from flask import jsonify, request, abort
+from typing import Dict, Union
 
 from app import app
 from .scraper import SCRAPERS
@@ -7,24 +9,37 @@ from .scraper import SCRAPERS
 
 def get_articles(data: Dict[str, Union[str, int]]) -> Dict[str, str]:
     scraper = SCRAPERS[data['website']]()
-    articles = scraper.get_articles(data['categories'],
+    articles = scraper.get_articles(data['categories'].split(','),
                                     data['number'])
     return articles
 
 
-@app.route('/website=<website>/category=<category>')
-@app.route('/website=<website>/category=<category>/number=<int:number>')
-@app.route('/website=<website>/category=<category>/date_range=<date_range>')
-@app.route('/website=<website>/category=<category>/number=<int:number>/date_range=<date_range>')
-def get_query(website: str, category: str, number: int = 3):
+@app.route('/', methods=['GET'])
+@app.route('/api', methods=['GET'])
+def index():
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    file_path = os.path.join(basedir, 'index.json')
+    with open(file_path, 'r') as json_file:
+        json_data = json.loads(json_file.read())
 
-    data = {'website': website,
-            'categories': category.split(','),
-            'number': number}
+    return jsonify(json_data)
 
-    articles = get_articles(data)
+
+@app.route('/api/get', methods=['GET'])
+def get_query():
+
+    args = request.args
+    if 'website' not in args or 'categories' not in args:
+        abort(400)
+
+    articles = get_articles(args)
 
     return jsonify(articles)
+
+
+@app.errorhandler(400)
+def bad_request(arg):
+    return jsonify({'error': 'bad request'})
 
 
 @app.errorhandler(404)

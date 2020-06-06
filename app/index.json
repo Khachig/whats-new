@@ -1,0 +1,48 @@
+{
+  "name": "whats-new",
+  "description": "Get the articles you want, when you want",
+  "url": "https://example.com",
+  "routes": {
+    "/api/get": {
+      "methods": [
+        "GET"
+      ],
+      "endpoints": {
+        "0": {
+          "methods": [
+            "GET"
+          ],
+          "args": {
+            "website": {
+              "required": true,
+              "enum": [
+                "the_narwhal"
+              ],
+              "description": "Website to query.",
+              "type": "string"
+            },
+            "categories": {
+              "required": false,
+              "default": [],
+              "description": "Query from given categories.",
+              "type": "array"
+            },
+            "number": {
+              "required": false,
+              "default": 3,
+              "description": "The number of articles to return.",
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "_links": {
+        "self": {
+          "0": {
+            "href": "https://example.com/api/get"
+          }
+        }
+      }
+    }
+  }
+}
