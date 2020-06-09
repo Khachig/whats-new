@@ -34,7 +34,7 @@ def get_query():
     if 'website' not in args:
         abort(400)
 
-    categories = args['categories'] if 'categories' in args else []
+    categories = args['categories'].split(',') if 'categories' in args else []
     number = args['number'] if 'number' in args else 3
     data = {'categories': categories, 'number': number}
 
@@ -46,9 +46,9 @@ def get_query():
 
 @app.errorhandler(400)
 def bad_request(arg):
-    return jsonify({'error': 'bad request'})
+    return jsonify({'error': f'{arg}'})
 
 
 @app.errorhandler(404)
 def not_found(arg):
-    return jsonify({'error': 'url not found'}), 404
+    return jsonify({'error': f'{arg}'}), 404
