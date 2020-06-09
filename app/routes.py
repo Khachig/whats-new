@@ -46,9 +46,9 @@ def get_query():
 
 @app.errorhandler(400)
 def bad_request(arg):
-    return jsonify({'error': 'bad request'})
+    return jsonify({'error': f'{arg}'})
 
 
 @app.errorhandler(404)
 def not_found(arg):
-    return jsonify({'error': 'url not found'}), 404
+    return jsonify({'error': f'{arg}'}), 404

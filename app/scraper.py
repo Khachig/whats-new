@@ -50,7 +50,7 @@ class Scraper(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_articles(self, category: str, num: int):
+    def get_articles(self, data: Dict[str, str]):
         raise NotImplementedError
 
 
@@ -78,9 +78,12 @@ class NarwhalScraper(Scraper):
     def __repr__(self):
         return f'{self.name}: {self.url}\nCategories: {self.ctg}'
 
-    def _get_ctg_dict(self) -> Dict[str, int]:
+    def _get_ctg_dict(self, num_to_name: bool = False) -> Dict[str, int]:
         ctg_ids = [6935, 6933, 6934, 6932, 7346, 7163, 6938, 6936, 7221, 6937]
-        categories = {self.ctg[i]: ctg_ids[i] for i in range(len(ctg_ids))}
+        if num_to_name:
+            categories = {ctg_ids[i]: self.ctg[i] for i in range(len(ctg_ids))}
+        else:
+            categories = {self.ctg[i]: ctg_ids[i] for i in range(len(ctg_ids))}
         return categories
 
     @staticmethod
@@ -119,7 +122,8 @@ class NarwhalScraper(Scraper):
         if endpoint == 'posts':
             categories = self._get_ctg_dict()
             query_params = {'page': 1,
-                            'categories': [categories[i] for i in args['categories']],
+                            'categories':
+                                [categories[i] for i in args['categories']],
                             'per_page': args['number']
                             }
             response = requests.get(request_url, params=query_params)
@@ -146,15 +150,15 @@ class NarwhalScraper(Scraper):
             image: link to header image of the article
             date: date of publication
             author: name of author and link to their author page
+            categories: the categories of the article as tagged in the website
 
-        <categories> specifies what section of the website to search in.
-        <num> specifies the number of articles to fetch.
-
-        === Preconditions ===
-        categories in self.ctg
-        num >= 1
+        <data> contains the keys 'categories' and 'numbers'. They specify
+        what category to search in and how many articles to fetch respectively.
+        'categories' can be an empty list. When thenarwhal api is given an
+        empty 'categories' parameter, it returns articles from the home page.
         """
         response = self._send_request('posts', data)
+        category_dict = self._get_ctg_dict(True)
         articles = []
         for element in response:
             link = element['link']
@@ -164,12 +168,15 @@ class NarwhalScraper(Scraper):
             date = element['date']
             author_id = element['author']
             author_name, author_link = self._get_author(author_id)
+            categories = list(map(lambda key: category_dict[key],
+                                  element['categories']))
             article = {'link': link,
                        'headline': headline,
                        'excerpt': excerpt,
                        'image': image,
                        'date': date,
-                       'author': ','.join((author_name, author_link))}
+                       'author': ','.join((author_name, author_link)),
+                       'categories': categories}
             articles.append(article)
 
         return articles
