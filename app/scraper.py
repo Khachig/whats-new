@@ -101,34 +101,30 @@ class NarwhalScraper(Scraper):
         page of the author given by <author_id>.
         """
 
-        response = self._send_request('users', [author_id])
+        response = self._send_request('users', {'author_id': author_id})
         name = response['name']
         link = response['link']
         return name, link
 
     def _send_request(self, endpoint: str,
-                     args: List[Union[str, int]]) -> \
+                      args: Dict[str, Union[str, int]]) -> \
             Union[List[dict], dict]:
         """
         Send GET request to The Narwhal api and return parsed json object.
 
         <endpoint> can be one of: users, posts
-        if <endpoint> is posts:
-            format of <args> is: [categories, per_page]
-        if <endpoint> is users:
-            format of <args> is: [author_id]
         """
 
         request_url = f'https://{self.url}/{self.api}/{endpoint}'
         if endpoint == 'posts':
             categories = self._get_ctg_dict()
             query_params = {'page': 1,
-                            'categories': [categories[i] for i in args[0]],
-                            'per_page': args[1]
+                            'categories': [categories[i] for i in args['categories']],
+                            'per_page': args['number']
                             }
             response = requests.get(request_url, params=query_params)
         else:
-            request_url += f'/{args[0]}'
+            request_url += f'/{args["author_id"]}'
             response = requests.get(request_url)
 
         response_json = json.loads(response.content)
@@ -140,8 +136,7 @@ class NarwhalScraper(Scraper):
         text = soup.find('p').text
         return text
 
-    def get_articles(self, categories: List[str],
-                     num: int) -> List[Dict[str, str]]:
+    def get_articles(self, data: Dict[str, str]) -> List[Dict[str, str]]:
         """
         Return a list of <num> elements, where each element is a dictionary
         containing the following metadata about the article:
@@ -159,7 +154,7 @@ class NarwhalScraper(Scraper):
         categories in self.ctg
         num >= 1
         """
-        response = self._send_request('posts', [categories, num])
+        response = self._send_request('posts', data)
         articles = []
         for element in response:
             link = element['link']

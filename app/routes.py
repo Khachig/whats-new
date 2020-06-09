@@ -29,10 +29,17 @@ def index():
 def get_query():
 
     args = request.args
-    if 'website' not in args or 'categories' not in args:
+
+    # 'website' is a required parameter
+    if 'website' not in args:
         abort(400)
 
-    articles = get_articles(args)
+    categories = args['categories'] if 'categories' in args else []
+    number = args['number'] if 'number' in args else 3
+    data = {'categories': categories, 'number': number}
+
+    scraper = SCRAPERS[args['website']]()
+    articles = scraper.get_articles(data)
 
     return jsonify(articles)
 
