@@ -34,7 +34,7 @@ def get_query():
     if 'website' not in args:
         abort(400)
 
-    categories = args['categories'] if 'categories' in args else []
+    categories = args['categories'].split(',') if 'categories' in args else []
     number = args['number'] if 'number' in args else 3
     data = {'categories': categories, 'number': number}
 
